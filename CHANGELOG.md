@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-10
+
+### Added
+- Week 06 tab: main assignment only (no code-along). Status comes from the
+  Canvas grade; the AI score covers `wwr/index.html` and `wwr/trips.html`
+  combined plus the wwr stylesheet. `--week` now accepts 1-6 (default 6).
+  New config: `canvas.main_assignments.week06` and
+  `checks.week06.main_assignment_files`.
+
 ## 2026-09-28
 
 ### Changed

@@ -193,7 +193,7 @@ def parse_args(argv):
     list (GitHub usernames or name substrings), reusing the cache for
     everyone else. config_path is whatever positional arg is left."""
     config_path = None
-    current_week = 5
+    current_week = 6
     recheck_all = False
     update_query = None
     i = 0
@@ -210,8 +210,8 @@ def parse_args(argv):
         else:
             config_path = argv[i]
             i += 1
-    if not 1 <= current_week <= 5:
-        raise SystemExit(f"--week must be 1-5, got {current_week}")
+    if not 1 <= current_week <= 6:
+        raise SystemExit(f"--week must be 1-6, got {current_week}")
     if recheck_all and update_query:
         raise SystemExit("--recheck-all and --update are mutually exclusive.")
     return config_path, current_week, recheck_all, update_query
@@ -365,7 +365,7 @@ def main():
             return f"{domain}/courses/{course_id}/assignments/{aid}/submissions/{sid}" if aid else None
 
         print("Resolving weekly main assignments...")
-        main_weeks_to_check = [wk for wk in ["week01", "week02", "week03", "week04", "week05"]
+        main_weeks_to_check = [wk for wk in ["week01", "week02", "week03", "week04", "week05", "week06"]
                                 if _week_num(wk) <= effective_week]
         main_assignment_names = {wk: canvas["main_assignments"][wk] for wk in main_weeks_to_check}
         main_assignment_ids = canvas_api.resolve_assignment_ids(domain, course_id, list(main_assignment_names.values()))
@@ -534,6 +534,8 @@ def main():
         if effective_week >= 5:
             file_paths.append(checks["week05"]["codealong_file"])
             file_paths.append(checks["week05"]["main_assignment_file"])
+        if effective_week >= 6:
+            file_paths += checks["week06"]["main_assignment_files"]
         file_paths += cfg["guardrail_files"]
         folder_paths = [wk for wk in cfg["week_folders_to_check"] if _week_num(wk) <= effective_week]
 
@@ -566,6 +568,9 @@ def main():
             paths.update(find_css_links(index_html, checks["ai_scan_root_file"]))
             paths.update(find_css_links(temple_html, checks["week02"]["file"]))
             paths.update(find_css_links(about_html, checks["week03"]["file"]))
+            if effective_week >= 6:
+                for f in checks["week06"]["main_assignment_files"]:
+                    paths.update(find_css_links(r["files"].get(f), f))
             if paths:
                 css_lookup_items.append({
                     "sid": s["sid"], "username": s["username"], "repo": repo_used,
@@ -763,12 +768,24 @@ def main():
             contact_html = (r or {}).get("files", {}).get(checks["week05"]["main_assignment_file"]) if effective_week >= 5 else None
             contact_link = f"{root}/blob/{branch}/{checks['week05']['main_assignment_file']}" if (root and contact_html is not None) else None
 
+            # week06 main assignment: wwr/index.html + wwr/trips.html, no
+            # code-along. Scored on both pages' HTML combined (a page that
+            # trips a signal anywhere counts), plus the wwr stylesheet.
+            w06_files = checks["week06"]["main_assignment_files"] if effective_week >= 6 else []
+            w06_pages = [(f, (r or {}).get("files", {}).get(f)) for f in w06_files]
+            w06_html = "\n".join(h for _, h in w06_pages if h) or None
+            w06_main_status = main_status(sid, "week06") if effective_week >= 6 else "not_checked"
+            w06_links = [f"{root}/blob/{branch}/{f}" for f, h in w06_pages if root and h is not None]
+            w06_main_link = w06_links[0] if w06_links else None
+
             # AI scores for each week's main assignment: week1/2 (index.html,
             # progressively +its css), week3/4 (wwr/about.html -- same file,
             # updated across both weeks), week5 (wwr/contact.html)
             w1_ai = ai_signals.combined_score(index_html, None)
             w2_ai = ai_signals.combined_score(index_html, css_text_all or None)
             w05_ai = ai_signals.combined_score(contact_html, wwr_css_text)
+            w06_ai = ai_signals.combined_score(w06_html, wwr_css_text) if w06_html \
+                else {"checked": False, "score": None, "level": None, "signals": []}
 
             # guardrail raw content, collected for cross-student consensus below
             for gfile in cfg["guardrail_files"]:
@@ -813,7 +830,13 @@ def main():
                     "mainAssignment": {"status": w05_main_status, "fileLink": contact_link,
                                         "gradeLink": main_grade_link(sid, "week05")},
                 },
-                "ai": {"week1": w1_ai, "week2": w2_ai, "week3": w03_ai, "week4": w03_ai, "week5": w05_ai},
+                "week06": {
+                    "mainAssignment": {"status": w06_main_status, "fileLink": w06_main_link,
+                                        "fileLinks": w06_links,
+                                        "gradeLink": main_grade_link(sid, "week06")},
+                },
+                "ai": {"week1": w1_ai, "week2": w2_ai, "week3": w03_ai, "week4": w03_ai, "week5": w05_ai,
+                       "week6": w06_ai},
                 "note": s["flag"],
             }
 

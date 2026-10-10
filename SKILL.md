@@ -5,7 +5,7 @@ description: Builds the WDD130 Weekly Progress dashboard (per-week code-along co
 
 # WDD130 Weekly Progress
 
-Generates the tabbed HTML progress report (Dashboard + Week 01/02/03 tabs)
+Generates the tabbed HTML progress report (Dashboard + Week 01-06 tabs)
 for a WDD130 section: which students have completed each week's code-along,
 a heuristic AI-usage score per student per week, and a check for whether
 anyone has modified or removed the course's `AGENTS.md` / `.github/copilot-
@@ -71,11 +71,11 @@ institution reusing this course), ask for the correct Canvas domain too.
 ## Running it
 
 **Before running, ask the instructor which week of the course to check
-through (1-5).** There's no point checking (or showing) weeks the class
+through (1-6).** There's no point checking (or showing) weeks the class
 hasn't reached yet -- early in the term this also cuts down on wasted
 GitHub API calls for files that don't exist. Pass their answer as
 `--week N`; if they want the full history regardless of pacing, omit the
-flag (defaults to checking all 5 weeks).
+flag (defaults to checking all 6 weeks).
 
 Preferred: `bash run.sh --week N` or `python run.py --week N`, whichever
 the instructor set up (see "Before running" above). Use whatever command
@@ -179,7 +179,7 @@ understand the whole pipeline.
   removed or down-weighted because they're taught/expected in this course
   and didn't discriminate in practice. Scored against each week's *main
   assignment* (index.html for weeks 1-2, wwr/about.html for weeks 3-4,
-  wwr/contact.html for week5) -- not the lower-stakes code-along files.
+  wwr/contact.html for week5, wwr/index.html + wwr/trips.html combined for week6) -- not the lower-stakes code-along files.
 - `scripts/build_report.py` -- orchestrates everything above, gates which
   weeks get fetched/checked based on `--week N` (see "Running it"), and
   injects the result into `assets/report_template.html`. Each week's

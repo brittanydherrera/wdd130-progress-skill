@@ -279,6 +279,7 @@
       <button class="navbtn" data-view="week03" role="tab">Week 03</button>
       <button class="navbtn" data-view="week04" role="tab">Week 04</button>
       <button class="navbtn" data-view="week05" role="tab">Week 05</button>
+      <button class="navbtn" data-view="week06" role="tab">Week 06</button>
       <button class="navbtn" data-view="about" role="tab">About</button>
     </div>
     <div class="sidebar-tools">
@@ -522,6 +523,29 @@
       </div>
     </div>
 
+    <div id="panel-week06" class="viewpanel">
+      <div class="tabbar" role="tablist" data-scope="week06">
+        <button class="tabbtn active" data-subtab="main" role="tab">Main Assignment: W06 Assignment: Rafting Site – Home and Trips Pages</button>
+      </div>
+
+      <div id="subpanel-week06-main" class="subtabpanel active">
+        <p class="sec-note">No code-along this week. Status comes straight from the Canvas grade on this assignment. Also carries an AI-usage score, checked against <span class="code">wwr/index.html</span> and <span class="code">wwr/trips.html</span> together plus the wwr stylesheet.</p>
+        <div class="stats" id="w06main-stats"></div>
+        <section>
+          <div class="sec-head"><h2>Completed</h2><span class="count-pill" id="w06main-pass-count" style="--pill-bg:var(--good-soft); --pill-fg:var(--good);"></span></div>
+          <details><summary>Show students</summary><div class="names-grid" id="w06main-pass-list"></div></details>
+        </section>
+        <section>
+          <div class="sec-head"><h2>0 Grade</h2><span class="count-pill" id="w06main-zero-count" style="--pill-bg:var(--bad-soft); --pill-fg:var(--bad);"></span></div>
+          <div class="roster" id="w06main-zero-list"></div>
+        </section>
+        <section style="margin-bottom:0;">
+          <div class="sec-head"><h2>Not submitted</h2><span class="count-pill" id="w06main-notsubmitted-count" style="--pill-bg:var(--unknown-soft); --pill-fg:var(--unknown);"></span></div>
+          <div class="roster" id="w06main-notsubmitted-list"></div>
+        </section>
+      </div>
+    </div>
+
     <div id="panel-about" class="viewpanel">
       <h2 style="margin-bottom:22px;">About this dashboard</h2>
       <div class="about-list">
@@ -733,7 +757,7 @@ function studentReasons(s, weekKey){
   return reasons;
 }
 
-// Shared across all 5 weeks -- every code-along check collapses to the same
+// Shared across the 5 code-along weeks -- every code-along check collapses to the same
 // 3 outcomes (pass / self-reported-but-failed / didn't self-report), so one
 // render function drives every week's Code Along Activity sub-tab.
 function renderCodealong(weekKey, prefix){
@@ -775,10 +799,21 @@ function renderCodealong(weekKey, prefix){
     </div>`).join('');
 }
 
-// Shared across all 5 weeks -- completed/0 Grade/not submitted comes
+// Shared across all 6 weeks -- completed/0 Grade/not submitted comes
 // straight from that week's Canvas assignment grade (see build_report.py's
 // main_status). The AI-usage badge only ever appears here, not on the
 // code-along side, since it's scored against each week's graded deliverable.
+function mainFileLinks(a, cls){
+  const links = (a.fileLinks && a.fileLinks.length) ? a.fileLinks : (a.fileLink ? [a.fileLink] : []);
+  return links.map(l => {
+    const name = l.split('/').pop();
+    const label = links.length > 1 ? name : 'view file';
+    return cls === 'go'
+      ? `<a class="go" href="${esc(l)}" target="_blank" rel="noopener">${links.length > 1 ? 'View ' + esc(name) : 'View file'} &rarr;</a>`
+      : `<a href="${esc(l)}" target="_blank" rel="noopener">${esc(label)} &rarr;</a>`;
+  }).join('');
+}
+
 function renderMainAssignment(weekKey, prefix, aiKey){
   const pass = DATA.filter(s => s[weekKey].mainAssignment.status === 'completed');
   const zero = DATA.filter(s => s[weekKey].mainAssignment.status === 'zero_grade');
@@ -796,7 +831,7 @@ function renderMainAssignment(weekKey, prefix, aiKey){
   document.getElementById(`${prefix}-pass-list`).innerHTML = pass.map(s => { const b = aiBadge(s.ai && s.ai[aiKey]); return `
     <div class="ai-item"><div class="ng-head"><span class="ng-left"><span>${esc(s.name)}</span>${b.summary}</span>
       <span style="display:flex; gap:10px;">
-        ${s[weekKey].mainAssignment.fileLink ? `<a href="${esc(s[weekKey].mainAssignment.fileLink)}" target="_blank" rel="noopener">view file &rarr;</a>` : ''}
+        ${mainFileLinks(s[weekKey].mainAssignment, '')}
         <a href="${esc(s[weekKey].mainAssignment.gradeLink)}" target="_blank" rel="noopener">grade &rarr;</a>
       </span></div>${b.panel}</div>`; }).join('');
 
@@ -805,7 +840,7 @@ function renderMainAssignment(weekKey, prefix, aiKey){
       <span class="name">${esc(s.name)}</span><span class="uname">${esc(s.username||'')}</span>
       ${b.summary}
       <span class="actions">
-        ${s[weekKey].mainAssignment.fileLink ? `<a class="go" href="${esc(s[weekKey].mainAssignment.fileLink)}" target="_blank" rel="noopener">View file &rarr;</a>` : ''}
+        ${mainFileLinks(s[weekKey].mainAssignment, 'go')}
         <a class="go secondary" href="${esc(s[weekKey].mainAssignment.gradeLink)}" target="_blank" rel="noopener">Grade &rarr;</a>
       </span>
       ${b.panel}
@@ -845,6 +880,11 @@ function renderWeek05(){
   if (CURRENT_WEEK < 5) { document.getElementById('panel-week05').innerHTML = notCheckedPlaceholder('Week 05', 5); return; }
   renderCodealong('week05', 'w05ca');
   renderMainAssignment('week05', 'w05main', 'week5');
+}
+
+function renderWeek06(){
+  if (CURRENT_WEEK < 6) { document.getElementById('panel-week06').innerHTML = notCheckedPlaceholder('Week 06', 6); return; }
+  renderMainAssignment('week06', 'w06main', 'week6');
 }
 
 function initNav(){
@@ -899,6 +939,7 @@ renderWeek02();
 renderWeek03();
 renderWeek04();
 renderWeek05();
+renderWeek06();
 initNav();
 initSubTabs();
 initPageAuditSelect();
@@ -907,7 +948,7 @@ initDashSort();
 initCopyUsername();
 document.getElementById('current-week-note').innerHTML =
   `Checked through <strong>Week ${CURRENT_WEEK}</strong> this run` +
-  (CURRENT_WEEK < 5 ? ` &mdash; weeks ${CURRENT_WEEK + 1}&ndash;05 skipped (not yet reached).` : '.');
+  (CURRENT_WEEK < 6 ? ` &mdash; weeks ${CURRENT_WEEK + 1}&ndash;06 skipped (not yet reached).` : '.');
 document.getElementById('student-count').textContent = DATA.length;
 const sc2 = document.getElementById('student-count-2');
 if (sc2) sc2.textContent = DATA.length;

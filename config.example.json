@@ -22,7 +22,8 @@
       "week02": "W02 Assignment: Home Page Enhancement",
       "week03": "W03 Assignment: Rafting Site – About Us Page",
       "week04": "W04 Assignment: Rafting Site – Update About Us Page",
-      "week05": "W05 Assignment: Rafting Site – Contact Us Page"
+      "week05": "W05 Assignment: Rafting Site – Contact Us Page",
+      "week06": "W06 Assignment: Rafting Site – Home and Trips Pages"
     }
   },
 
@@ -60,6 +61,9 @@
       "codealong_requires_css_link": true,
       "codealong_requires_input": true,
       "main_assignment_file": "wwr/contact.html"
+    },
+    "week06": {
+      "main_assignment_files": ["wwr/index.html", "wwr/trips.html"]
     },
     "ai_scan_root_file": "index.html"
   },
